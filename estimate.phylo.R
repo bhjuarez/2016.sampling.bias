@@ -13,24 +13,30 @@ dat <- as.data.frame(dat)  # convert to data frame
 est <- 10  # set number of estimates (best set to number of known unsampled taxa)
 
 tree <- rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))  # simulate tree with matching tiplabels
+ultratree <- chronoMPL(tree, se = TRUE, test = TRUE)  # create ultrametric version
+
 
 estimate.pgls <- function(dat, phy, est){  # main function checking number of taxa to be added
   ###Add data to new tips
   pre.tree <- tree #define temporary tree to preserve original
-  n <- 100 ___THIS_WILL_NEED_TO_BE_ACCESSIBLE_FROM_OUTSIDE (and should probably be 'est')
-  for( i in 1:n) {  # loop adding random tips to tree
+  for( i in 1:est) {  # loop adding random tips to tree
     tree.labs <- paste("t", length(pre.tree$tip.label)+i, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
     node <- round(runif(1, 1, Nnode(pre.tree)+length(tree$tip.label)))  # pick node at random
     position <- runif(1)*pre.tree$edge.length[which(pre.tree$edge[, 2]==node)]  # pick location on node at random
-    new.tree <- bind.tip(pre.tree, tree.labs, where = node, position = position )  # add new tip to tree at selected node and position
-    pre.tree <- new.tree  # overwrite temporary tree with the one which has added node
+    if (is.ultrametric(pre.tree) == TRUE) {  # go without BL if tree is ultrametric
+      new.tree <- bind.tip(pre.tree, tree.labs, where = node, position = position )  # add new tip to tree at selected node and position
+    } else {  # go with assigned BL if tree is not ultrametric
+      edge.length <- runif(1,  min=(min(pre.tree$edge.length)), max=(max(pre.tree$edge.length)))  # create BL for new node, picked from uniform distribution with existing BLs as bounds
+      new.tree <- bind.tip(pre.tree, tree.labs, edge.length, where = node, position = position )  # add new tip to tree at selected node and position
+    }
+    pre.tree <- new.tree  # overwrite temporary tree with the one which has added node (so it carries over to next iteration)
   }
 
   reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = tree)
   mean <- reg$coeff[1, 1]
   sd <- sqrt(var(dat$length[which(dat$group == 1, )]))
   p <- reg$coeff[2, 4]
-  n <- 0
+  n <- 0  ______CHECKIFNEEDSCHANGE
   stats <- matrix(ncol = 2, nrow = 0)
   while(n < est & p < 0.05){
     n <- n + 1
