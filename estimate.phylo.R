@@ -1,29 +1,31 @@
+# load required packages
 require(ape)
 require(geiger)
 require(geomorph)
 require(phytools)
 
-fun <- dat[, 1] ~ as.vector(dat[, 2])
-dat <- cbind(rnorm(50, 50, 105), rep(1, 50))
-dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))
-colnames(dat) <- c("length", "group")
-rownames(dat) <- paste("t", seq(1:100), sep = "")
-dat <- as.data.frame(dat)
-est <- 10
+fun <- dat[, 1] ~ as.vector(dat[, 2])  # define function
+dat <- cbind(rnorm(50, 50, 105), rep(1, 50))  # simulate data group 1
+dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))  # simulate data group 2
+colnames(dat) <- c("length", "group")  # give colnames
+rownames(dat) <- paste("t", seq(1:100), sep = "")  # name species to match tree tip labels later
+dat <- as.data.frame(dat)  # convert to data frame
+est <- 10  # set number of estimates (best set to number of known unsampled taxa)
 
-tree <- rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))
-estimate.pgls <- function(dat, phy, est){
+tree <- rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))  # simulate tree with matching tiplabels
+
+estimate.pgls <- function(dat, phy, est){  # main function checking number of taxa to be added
   ###Add data to new tips
-  pre.tree <- tree
-  n <- 100
-  for( i in 1:n){
-    tree.labs <- paste("t", length(pre.tree$tip.label)+i, sep = "")
-    node <- round(runif(1, 1, Nnode(pre.tree)+length(tree$tip.label)))
-    position <- runif(1)*pre.tree$edge.length[which(pre.tree$edge[, 2]==node)]
-    new.tree <- bind.tip(pre.tree, tree.labs, where = node, position = position )
-    pre.tree <- new.tree
+  pre.tree <- tree #define temporary tree to preserve original
+  n <- 100 ___THIS_WILL_NEED_TO_BE_ACCESSIBLE_FROM_OUTSIDE (and should probably be 'est')
+  for( i in 1:n) {  # loop adding random tips to tree
+    tree.labs <- paste("t", length(pre.tree$tip.label)+i, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
+    node <- round(runif(1, 1, Nnode(pre.tree)+length(tree$tip.label)))  # pick node at random
+    position <- runif(1)*pre.tree$edge.length[which(pre.tree$edge[, 2]==node)]  # pick location on node at random
+    new.tree <- bind.tip(pre.tree, tree.labs, where = node, position = position )  # add new tip to tree at selected node and position
+    pre.tree <- new.tree  # overwrite temporary tree with the one which has added node
   }
-  
+
   reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = tree)
   mean <- reg$coeff[1, 1]
   sd <- sqrt(var(dat$length[which(dat$group == 1, )]))
@@ -50,5 +52,3 @@ reg <- summary(lm(length~as.factor(group), data = as.data.frame(dat)))
 
 #treedat <- treedata(tree, as.matrix(dat))
 #reg <- procD.pgls(treedat$data[, 1] ~ treedat$data[, 2], phy = treedat$phy)
-
-
