@@ -4,11 +4,13 @@ require(geomorph)
 require(phytools)
 
 fun <- dat[, 1] ~ as.vector(dat[, 2])
-dat <- cbind(rnorm(50, 50, 105), rep(1, 50))
+dat <- cbind(rnorm(50, 50, 125), rep(1, 50))
 dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))
 colnames(dat) <- c("length", "group")
 dat <- as.data.frame(dat)
 est <- 200
+
+estimate.lm.norm(fun, dat, est)
 
 estimate.lm <- function(fun, dat, est){
 	reg <- procD.lm(fun)
@@ -18,7 +20,6 @@ estimate.lm <- function(fun, dat, est){
 		stop("Regression is not significant")
 	}
 	
-	seed <- runif(est,0, 99999)
 	mean <- reg$coeff[1, 1]
 	sd <- sqrt(var(dat[, 1][which(dat[, 2] == 1, )]))
 	n <- 0
@@ -28,7 +29,6 @@ estimate.lm <- function(fun, dat, est){
 	while(n < est & p < 0.05){
   		n <- n + 1
   		i <- i +1
-  		#set.seed(seed[i])
   		sim <- rnorm(1, mean, sd)
   		sub.dat <- data.frame(sim, 1)
   		colnames(sub.dat) <- colnames(dat)
@@ -40,8 +40,35 @@ estimate.lm <- function(fun, dat, est){
 	return(stats)
 }
 
+estimate.lm.norm <- function(fun, dat, est){
+  reg <- summary(lm(fun))
+  p <- reg$coeff[2, 4]
+  
+  if(p > 0.05){
+    stop("Regression is not significant")
+  }
+  
+  mean <- reg$coeff[1, 1]
+  sd <- sqrt(var(dat[, 1][which(dat[, 2] == 1, )]))
+  n <- 0
+  i <- 0
+  stats <- matrix(ncol = 2, nrow = 0)
+  
+  while(n < est & p < 0.05){
+    n <- n + 1
+    i <- i +1
+    sim <- rnorm(1, mean, sd)
+    sub.dat <- data.frame(sim, 1)
+    colnames(sub.dat) <- colnames(dat)
+    dat <- rbind(dat, sub.dat)
+    sub.reg <- summary(lm(dat[, 1] ~ as.factor(dat[, 2])))
+    p <- sub.reg$coeff[2, 4]
+    stats <- rbind(stats, c(n, p))	
+  }
+  return(stats)
+}
 
-my_stats <- estimate.lm(fun, dat, est)
+estimate.lm.norm(fun, dat, est)
 
 
 
