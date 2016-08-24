@@ -16,21 +16,22 @@ tree <- rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))  # 
 ultratree <- chronoMPL(tree, se = TRUE, test = TRUE)  # create ultrametric version
 
 
-estimate.pgls <- function(dat, phy, est){  # main function checking number of taxa to be added
+estimate.pgls <- function(dat, phy, est) {  # main function checking number of taxa to be added
 
   # run regression on initial tree & data set
-  reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = tree)  # run regression
+  #reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = tree)  # run regression
+  reg <- summary(lm(length~as.factor(group), data = dat))
   mean <- reg$coeff[1, 1]  # save initial mean
   sd <- sqrt(var(dat$length[which(dat$group == 1, )]))  # save initial SD
   p <- reg$coeff[2, 4]  # save initial p-value
 
   pre.tree <- tree #define temporary tree to preserve original
-  n <- 0  ______CHECKIFNEEDSCHANGE  #set initial iteration to 0
+  n <- 0   #set initial iteration to 0
   stats <- matrix(ncol = 2, nrow = 0)  # initiate stats table
 #  for( i in 1:est) {  # loop adding random tips to tree
   while(n < est & p < 0.05) {
     n <- n + 1
-    tree.labs <- paste("t", length(pre.tree$tip.label)+i, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
+    tree.labs <- paste("t", length(pre.tree$tip.label) + n, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
     node <- round(runif(1, 1, Nnode(pre.tree)+length(tree$tip.label)))  # pick node at random
     position <- runif(1)*pre.tree$edge.length[which(pre.tree$edge[, 2]==node)]  # pick location on node at random
     if (is.ultrametric(pre.tree) == TRUE) {  # go without BL if tree is ultrametric
@@ -46,11 +47,20 @@ estimate.pgls <- function(dat, phy, est){  # main function checking number of ta
     colnames(sub.dat) <- c("length", "group")
     dat <- rbind(dat, sub.dat)
     sub.reg <- summary(lm(length~as.factor(group), data = dat))
+    #sub.reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = new.tree)  # run regression
     p <- sub.reg$coeff[2, 4]
     stats <- rbind(stats, c(n, p))
   }
   print(stats)
 }
+
+###############
+#test running
+
+estimate.pgls(dat, tree, est)
+
+
+
 
 ###Simulations
 BM.stats <- fitContinuous(tree, dat[, 1])$opt
