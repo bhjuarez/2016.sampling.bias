@@ -1,0 +1,10 @@
+Package: estimatoR
+Type: Package
+Title: Estimates Number of Samples Needed to Change Significance for Phylogenetic and Non-Phylogenetic Statistical Tests
+Version: 1.0
+Date: 2016-08-25
+Author: Bryan H. Juarez, Orlando Schwery, Giulio Valentino Dalla Riva
+Maintainer: Bryan H. Juarez <bhjuarez@iastate.edu>
+Depends: ape, broom, geiger, geomorph, phytools
+Description: Tests for effect of known missing samples on significance of regressions. It does so by iteratively simulating additional data (and species on the phylogeny, if included), until significance of the regression changes.
+License: GPL-3
