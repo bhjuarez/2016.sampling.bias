@@ -4,7 +4,7 @@ estimate.lm <- function(mod.obj, est){
   }
   
   if (class(mod.obj) == "lm"){  #Implement lm
-    p <- glance(mod.obj)$p.value
+    p <- broom::glance(mod.obj)$p.value
     if(p > 0.05){
       stop("Regression is not significant")
     }

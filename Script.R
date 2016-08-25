@@ -32,8 +32,8 @@ rownames(dat) <- paste("t", seq(1:100), sep = "")  # name species to match tree 
 dat <- as.data.frame(dat)  # convert to data frame
 est <- 10  # set number of estimates (best set to number of known unsampled taxa)
 
-tree <- rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))  # simulate tree with matching tiplabels
-ultratree <- chronoMPL(tree, se = TRUE, test = TRUE)  # create ultrametric version
+tree <- ape::rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))  # simulate tree with matching tiplabels
+ultratree <- ape::chronoMPL(tree, se = TRUE, test = TRUE)  # create ultrametric version
 
 source("./R/estimate.pgls.R")
 
@@ -43,8 +43,11 @@ estimate.pgls(dat, tree, est)
 
 
 ###Simulations
-BM.stats <- fitContinuous(tree, dat[, 1])$opt
-fastBM(tree, BM.stats$z0, sig2 = BM.stats$sigsq)
+data_vec <- dat[,1]
+names(data_vec) <- rownames(dat)
+
+BM.stats <- geiger::fitContinuous(tree, data_vec)$opt
+brownian_simul <- phytools::fastBM(tree, BM.stats$z0, sig2 = BM.stats$sigsq)
 reg <- summary(lm(length~as.factor(group), data = as.data.frame(dat)))
 
 #treedat <- treedata(tree, as.matrix(dat))
