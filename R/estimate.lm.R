@@ -21,8 +21,8 @@ estimate.lm <- function(mod.obj, est){
       sub.dat <- data.frame(sim, 1)
       colnames(sub.dat) <- colnames(dat)
       dat <- rbind(dat, sub.dat)
-      sub.p <- summary(lm(dat[, 1] ~ dat[, 2]))$coeff[2, 4] #make multivariate
-      stats <- rbind(stats, sub.p)	
+      p <- summary(lm(dat[, 1] ~ dat[, 2]))$coeff[2, 4] #make multivariate
+      stats <- rbind(stats, p)	
     }
     return(dim(stats)[1])
   }

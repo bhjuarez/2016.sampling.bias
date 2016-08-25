@@ -10,14 +10,13 @@ require(phytools)
 ## initialize objects and run analysis
 
 ### for standard lm
+source("./R/estimate.lm.R")
 
 dat <- cbind(rnorm(50, 50, 125), rep(1, 50))  #Generate data 1
 dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))  #Generate data 2 and bind
 colnames(dat) <- c("length", "group")  #Assing column names
 dat <- as.data.frame(dat)
 test <- lm(dat[, 1] ~ dat [, 2])  #Run initial regression
-
-source("./R/estimate.lm.R")
 
 #' test running
 estimate.lm(test, 200)  #Run function
