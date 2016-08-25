@@ -10,7 +10,7 @@ estimate.lm <- function(mod.obj, est){
     }
     
     dat <- mod.obj$model
-    mean <- test[[1]][[1]]
+    mean <- mod.obj[[1]][[1]]
     sd <- sqrt(var(dat[, 1][which(dat[, 2] == 1, )]))  #Make multivariate ind and dep
     n <- 0
     stats <- matrix(ncol = 1, nrow = 0)
