@@ -1,24 +1,10 @@
-require(ape)
-require(broom)
-require(geiger)
-require(geomorph)
-require(phytools)
-
-dat <- cbind(rnorm(50, 50, 125), rep(1, 50))  #Generate data 1
-dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))  #Generate data 2 and bind
-colnames(dat) <- c("length", "group")  #Assing column names
-dat <- as.data.frame(dat)
-test <- lm(dat[, 1] ~ dat [, 2])  #Run initial regression
-
-estimate.lm(test, 200)  #Run function
-
 estimate.lm <- function(mod.obj, est){
   if (class(mod.obj) != "lm" & class(mod.obj) != "procD.lm"){  #Check if user provided correct object
     stop("Please provide a lm or procD.lm model object")
   }
   
   if (class(mod.obj) == "lm"){  #Implement lm
-    p <- glance(mod.obj)$p.value
+    p <- broom::glance(mod.obj)$p.value
     if(p > 0.05){
       stop("Regression is not significant")
     }
@@ -35,7 +21,7 @@ estimate.lm <- function(mod.obj, est){
       sub.dat <- data.frame(sim, 1)
       colnames(sub.dat) <- colnames(dat)
       dat <- rbind(dat, sub.dat)
-      sub.p <- summary(lm(dat[, 1] ~ dat[, 2]))$coeff[2, 4] $make multivariate
+      sub.p <- summary(lm(dat[, 1] ~ dat[, 2]))$coeff[2, 4] #make multivariate
       stats <- rbind(stats, sub.p)	
     }
     return(dim(stats)[1])
@@ -69,18 +55,3 @@ estimate.lm <- function(mod.obj, est){
     return(list(stats, dim(stats)[1]))
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
