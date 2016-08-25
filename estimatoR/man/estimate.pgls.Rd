@@ -1,96 +1,42 @@
 \name{estimate.pgls}
 \alias{estimate.pgls}
 \title{
-%%  ~~function to do ... ~~
+Estimates Number of Samples Needed to Change Significance for Phylogenetic Regression
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Tests for effect of known missing samples on significance of phylogenetic regression. It does so by iteratively simulating additional data and species on the phylogeny, until the significance of the regression changes.
 }
 \usage{
 estimate.pgls(dat, phy, est)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dat}{
-%%     ~~Describe \code{dat} here~~
+Data frame containing, data in first column and group assignment (using integers) in second column. Rownames corresponding to tip labels of tree.
 }
   \item{phy}{
-%%     ~~Describe \code{phy} here~~
+An object of type 'phy', a rooted phylogeny. Can be ultrametric or not. Tip labels corresponding to rownames of data table.
 }
   \item{est}{
-%%     ~~Describe \code{est} here~~
+Number of missing taxa of the focal group (if known). This value will act as a maximum limit for iterations adding new species.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+Matrix with number of iterations (which corresponds to missing taxa to be sampled) in first column and new p-values for each iteration in second column.
 }
 \author{
-%%  ~~who you are~~
+Bryan H. Juarez, Orlando Schwery, Giulio Valentino Dalla Riva
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{estimate.lm}}, \code{\link{estimatoR-package}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dat, phy, est)
-{
-    reg <- summary(lm(length ~ as.factor(group), data = dat))
-    mean <- reg$coeff[1, 1]
-    sd <- sqrt(var(dat$length[which(dat$group == 1, )]))
-    p <- reg$coeff[2, 4]
-    pre.tree <- tree
-    n <- 0
-    stats <- matrix(ncol = 2, nrow = 0)
-    while (n < est & p < 0.05) {
-        n <- n + 1
-        tree.labs <- paste("t", length(pre.tree$tip.label) +
-            n, sep = "")
-        node <- round(runif(1, 1, Nnode(pre.tree) + length(tree$tip.label)))
-        position <- runif(1) * pre.tree$edge.length[which(pre.tree$edge[,
-            2] == node)]
-        if (is.ultrametric(pre.tree) == TRUE) {
-            new.tree <- bind.tip(pre.tree, tree.labs, where = node,
-                position = position)
-        }
-        else {
-            edge.length <- runif(1, min = (min(pre.tree$edge.length)),
-                max = (max(pre.tree$edge.length)))
-            new.tree <- bind.tip(pre.tree, tree.labs, edge.length,
-                where = node, position = position)
-        }
-        pre.tree <- new.tree
-        sim <- rnorm(1, mean, sd)
-        sub.dat <- data.frame(sim, 1)
-        colnames(sub.dat) <- c("length", "group")
-        dat <- rbind(dat, sub.dat)
-        sub.reg <- summary(lm(length ~ as.factor(group), data = dat))
-        p <- sub.reg$coeff[2, 4]
-        stats <- rbind(stats, c(n, p))
-    }
-    print(stats)
-  }
+  fun <- dat[, 1] ~ as.vector(dat[, 2])  # define function
+  dat <- cbind(rnorm(50, 50, 105), rep(1, 50))  # simulate data group 1
+  dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))  # simulate data group 2
+  colnames(dat) <- c("length", "group")  # give colnames
+  rownames(dat) <- paste("t", seq(1:100), sep = "")  # name species to match tree tip labels later
+  dat <- as.data.frame(dat)  # convert to data frame
+  est <- 10  # set number of estimates (best set to number of known unsampled taxa)
+  tree <- rtree(100, rooted = T, tip.label = paste("t", seq(1:100), sep = ""))  # simulate tree with matching tiplabels
+  estimate.pgls(dat, tree, est) # test running
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

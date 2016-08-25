@@ -3,33 +3,27 @@
 \alias{estimatoR}
 \docType{package}
 \title{
-\packageTitle{estimatoR}
+Estimates Number of Samples Needed to Change Significance for Phylogenetic and Non-Phylogenetic Statistical Tests
 }
 \description{
-\packageDescription{estimatoR}
+Tests for effect of known missing samples on significance of regressions. It does so by iteratively simulating additional data (and species on the phylogeny, if included), until significance of the regression changes.
 }
 \details{
-
-The DESCRIPTION file:
-\packageDESCRIPTION{estimatoR}
-\packageIndices{estimatoR}
-~~ An overview of how to use the package, including the most important functions ~~
+\tabular{ll}{
+Package: \tab estimatoR\cr
+Type: \tab Package\cr
+Version: \tab 1.0\cr
+Date: \tab 2016-08-25\cr
+License: \tab GPL-3\cr
+}
+Tests for effect of known missing samples on significance of regressions. The function 'estimate.lm' will do so without incorporating phylogeny and just simulate new data, whereas 'estimate.pgls' will include the phylogeny and also randomply add new tips for the new data points.
 }
 \author{
-\packageAuthor{estimatoR}
+Bryan H. Juarez, Orlando Schwery, Giulio Valentino Dalla Riva
 
-Maintainer: \packageMaintainer{estimatoR}
+Maintainer: Bryan H. Juarez <bhjuarez@iastate.edu>
 }
-\references{
-~~ Literature or other references for background information ~~
-}
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R ~~
-~~ documentation directory ~~
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
-\examples{
-~~ simple examples of the most important functions ~~
+\code{\link{estimate.lm}}, \code{\link{estimate.pgls}}
 }

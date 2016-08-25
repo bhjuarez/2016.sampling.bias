@@ -1,108 +1,36 @@
 \name{estimate.lm}
 \alias{estimate.lm}
 \title{
-%%  ~~function to do ... ~~
+Estimates Number of Samples Needed to Change Significance for Regression
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Tests for effect of known missing samples on significance of regression, without incorporating phylogeny. It does so by iteratively simulating additional data until the significance of the regression changes.
 }
 \usage{
 estimate.lm(mod.obj, est)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{mod.obj}{
-%%     ~~Describe \code{mod.obj} here~~
+Regression object made from data frame containing, data in first column and group assignment (using integers) in second column.
 }
   \item{est}{
-%%     ~~Describe \code{est} here~~
+Number of missing taxa of the focal group (if known). This value will act as a maximum limit for iterations adding new species.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+Number of iterations (which corresponds to missing taxa to be sampled).
 }
 \author{
-%%  ~~who you are~~
+Bryan H. Juarez, Orlando Schwery, Giulio Valentino Dalla Riva
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{estimate.pgls}}, \code{\link{estimatoR-package}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (mod.obj, est)
-{
-    if (class(mod.obj) != "lm" & class(mod.obj) != "procD.lm") {
-        stop("Please provide a lm or procD.lm model object")
-    }
-    if (class(mod.obj) == "lm") {
-        p <- broom::glance(mod.obj)$p.value
-        if (p > 0.05) {
-            stop("Regression is not significant")
-        }
-        dat <- mod.obj$model
-        mean <- test[[1]][[1]]
-        sd <- sqrt(var(dat[, 1][which(dat[, 2] == 1, )]))
-        n <- 0
-        stats <- matrix(ncol = 1, nrow = 0)
-        while (n < est & p < 0.05) {
-            n <- n + 1
-            sim <- rnorm(1, mean, sd)
-            sub.dat <- data.frame(sim, 1)
-            colnames(sub.dat) <- colnames(dat)
-            dat <- rbind(dat, sub.dat)
-            sub.p <- summary(lm(dat[, 1] ~ dat[, 2]))$coeff[2,
-                4]
-            stats <- rbind(stats, sub.p)
-        }
-        return(dim(stats)[1])
-    }
-    else {
-        reg <- procD.lm(fun)
-        p <- reg$aov.table[1, 7]
-        if (p > 0.05) {
-            stop("Regression is not significant")
-        }
-        mean <- reg$coeff[1, 1]
-        sd <- sqrt(var(dat[, 1][which(dat[, 2] == 1, )]))
-        n <- 0
-        i <- 0
-        stats <- matrix(ncol = 1, nrow = 0)
-        while (n <= est & p < 0.05) {
-            n <- n + 1
-            i <- i + 1
-            sim <- rnorm(1, mean, sd)
-            sub.dat <- data.frame(sim, 1)
-            colnames(sub.dat) <- colnames(dat)
-            dat <- rbind(dat, sub.dat)
-            sub.reg <- procD.lm(length ~ group, data = dat)
-            p <- sub.reg$aov.table[1, 7]
-            stats <- rbind(stats, p)
-        }
-        return(list(stats, dim(stats)[1]))
-    }
-  }
+  dat <- cbind(rnorm(50, 50, 125), rep(1, 50))  #Generate data 1
+  dat <- rbind(dat, cbind(rnorm(50, 110, 90), rep(2, 50)))  #Generate data 2 and bind
+  colnames(dat) <- c("length", "group")  #Assing column names
+  dat <- as.data.frame(dat)
+  test <- lm(dat[, 1] ~ dat [, 2])  #Run initial regression
+  estimate.lm(test, 200)  # test running
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
