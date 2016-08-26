@@ -2,8 +2,7 @@ estimate.pgls <- function(f1, gdf, est){  # main function checking number of tax
   
   #run regression on initial tree & data set
   num.phy <- which(lapply(gdf, class)=='phylo')
-  phy <- gdf[[-num.phy]]
-
+  phy <- gdf[[num.phy]]
   reg <- procD.pgls(f1, phy = phy, data = gdf)  # run regression
   mean <- reg$pgls.coefficients[[1]]  # save initial mean
   sd <- sqrt(var(reg$Y[which(reg$X[, 2] == 0)]))  # save initial SD
@@ -16,10 +15,11 @@ estimate.pgls <- function(f1, gdf, est){  # main function checking number of tax
   pre.tree <- phy #define temporary tree to preserve original
   n <- 0   #set initial iteration to 0
   stats <- matrix(ncol = 2, nrow = 0)  # initiate stats table
+  dat <- gdf[-num.phy]
 
   while(n < est & p < 0.05) {
     n <- n + 1
-    tree.labs <- paste("t", length(pre.tree$tip.label) + n, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
+    tree.labs <- paste("t", length(pre.tree$tip.label) + 1, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
     node <- round(runif(1, 1, Nnode(pre.tree)+length(tree$tip.label)))  # pick node at random
     position <- runif(1)*pre.tree$edge.length[which(pre.tree$edge[, 2]==node)]  # pick location on node at random
     if (is.ultrametric(pre.tree) == TRUE) {  # go without BL if tree is ultrametric
@@ -31,15 +31,20 @@ estimate.pgls <- function(f1, gdf, est){  # main function checking number of tax
     pre.tree <- new.tree  # overwrite temporary tree with the one which has added node (so it carries over to next iteration)
 
     sim <- rnorm(1, mean, sd)
-    sub.dat <- data.frame(sim, 1)
-    dat <- gdf[-num.phy]
-    colnames(sub.dat) <- names(dat)
-    dat <- rbind(dat, sub.dat)
-    rownames(dat) <- c(rownames(reg$Y), tree.labs)
     
-    sub.reg <- procD.pgls(f1, phy = pre.tree, data = test)  # run regression
-    p <- sub.reg$coeff[2, 4]
+    names(sim) <- names(dat)[1]
+    dat[[1]] <- c(dat[[1]], sim)
+    names(dat[[1]]) <- c(names(dat[[1]][-length(dat[[1]])]), tree.labs)
+    
+    add <- 1
+    names(add) <- names(dat)[2]
+    dat[[2]] <- c(dat[[2]], add)
+    names(dat[[2]]) <- c(names(dat[[1]][-length(dat[[1]])]), tree.labs)
+    
+    
+    sub.reg <- procD.pgls(f1, phy = pre.tree, data = dat)  # run regression
+    p <- sub.reg$aov.table[nrow(sub.reg$aov.table) - 2, 7] 
     stats <- rbind(stats, c(n, p))
   }
-  print(stats)
+  return(list(stats, dim(stats)[1]))
 }

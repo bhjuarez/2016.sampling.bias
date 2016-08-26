@@ -34,7 +34,7 @@ gdf <- geomorph.data.frame(length = dat[, 1], group = dat[, 2], phy = tree)
 est <- 10  # set number of estimates (best set to number of known unsampled taxa)
 
 #' test running
-estimate.pgls(dat, tree, est)
+estimate.pgls(f1, gdf, est)
 
 
 
