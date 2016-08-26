@@ -1,17 +1,22 @@
-estimate.pgls <- function(dat, phy, est) {  # main function checking number of taxa to be added
-
+estimate.pgls <- function(f1, gdf, est){  # main function checking number of taxa to be added
+  
   #run regression on initial tree & data set
-  dat <- geomorph.data.frame(dat)
-  reg <- procD.pgls(dat[[1]][, 1] ~ dat[[1]][, 2], phy)  # run regression
-  #reg <- summary(lm(length~as.factor(group), data = dat))
-  mean <- reg$coeff[1, 1]  # save initial mean
-  sd <- sqrt(var(dat$length[which(dat$group == 1, )]))  # save initial SD
-  p <- reg$coeff[2, 4]  # save initial p-value
+  num.phy <- which(lapply(gdf, class)=='phylo')
+  phy <- gdf[[-num.phy]]
 
-  pre.tree <- tree #define temporary tree to preserve original
+  reg <- procD.pgls(f1, phy = phy, data = gdf)  # run regression
+  mean <- reg$pgls.coefficients[[1]]  # save initial mean
+  sd <- sqrt(var(reg$Y[which(reg$X[, 2] == 0)]))  # save initial SD
+  p <- reg$aov.table[nrow(reg$aov.table) - 2, 7]  # save initial p-value
+
+  if(p > 0.05){
+      stop("Regression is not significant")
+  }
+    
+  pre.tree <- phy #define temporary tree to preserve original
   n <- 0   #set initial iteration to 0
   stats <- matrix(ncol = 2, nrow = 0)  # initiate stats table
-#  for( i in 1:est) {  # loop adding random tips to tree
+
   while(n < est & p < 0.05) {
     n <- n + 1
     tree.labs <- paste("t", length(pre.tree$tip.label) + n, sep = "")  # generate label that corresponds to format of existing ones (continuing the numeration)
@@ -27,10 +32,12 @@ estimate.pgls <- function(dat, phy, est) {  # main function checking number of t
 
     sim <- rnorm(1, mean, sd)
     sub.dat <- data.frame(sim, 1)
-    colnames(sub.dat) <- c("length", "group")
+    dat <- gdf[-num.phy]
+    colnames(sub.dat) <- names(dat)
     dat <- rbind(dat, sub.dat)
-    sub.reg <- summary(lm(length~as.factor(group), data = dat))
-    #sub.reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = new.tree)  # run regression
+    rownames(dat) <- c(rownames(reg$Y), tree.labs)
+    
+    sub.reg <- procD.pgls(f1, phy = pre.tree, data = test)  # run regression
     p <- sub.reg$coeff[2, 4]
     stats <- rbind(stats, c(n, p))
   }
