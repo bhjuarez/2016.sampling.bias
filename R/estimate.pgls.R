@@ -1,8 +1,9 @@
 estimate.pgls <- function(dat, phy, est) {  # main function checking number of taxa to be added
 
-  # run regression on initial tree & data set
-  #reg <- procD.pgls(dat[, 1] ~ dat[, 2], phy = tree)  # run regression
-  reg <- summary(lm(length~as.factor(group), data = dat))
+  #run regression on initial tree & data set
+  dat <- geomorph.data.frame(dat)
+  reg <- procD.pgls(dat[[1]][, 1] ~ dat[[1]][, 2], phy)  # run regression
+  #reg <- summary(lm(length~as.factor(group), data = dat))
   mean <- reg$coeff[1, 1]  # save initial mean
   sd <- sqrt(var(dat$length[which(dat$group == 1, )]))  # save initial SD
   p <- reg$coeff[2, 4]  # save initial p-value
