@@ -1,5 +1,16 @@
-# Main script
+---
+title: "estimatoR Tutorial"
+author: "[Bryan H. Juarez](http://www.eeob.iastate.edu/people/bryan-juarez), [Orlando Schwery](https://sites.google.com/site/orlandoschwery/)"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{estimatoR Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
+# Main script
+```{r, eval=FALSE}
 ## load required packages
 require(ape)
 require(broom)
@@ -48,3 +59,4 @@ reg <- summary(lm(length~as.factor(group), data = as.data.frame(dat)))
 
 #treedat <- treedata(tree, as.matrix(dat))
 #reg <- procD.pgls(treedat$data[, 1] ~ treedat$data[, 2], phy = treedat$phy)
+```
