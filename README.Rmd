@@ -1,0 +1,10 @@
+# estimatoR
+R package to gain information of whether additional sampling is necessary.
+
+(more information and functionality will follow here soon...)
+
+[![Build Status](https://travis-ci.org/oschwery/MonoPhy.svg?branch=master)](https://travis-ci.org/bhjuarez/estimatoR)
+[![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/estimatoR)](https://cran.r-project.org/package=estimatoR)
+[![packageversion](https://img.shields.io/badge/GitHub%20Package%20version-1.0-orange.svg?style=flat-square)](commits/master)
